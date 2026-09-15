@@ -89,4 +89,4 @@ Thumbs.db
 # ==============================
 
 *.tmp
-*.temp
+*.temp*.egg-info/
