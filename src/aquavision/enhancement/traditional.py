@@ -1,32 +1,57 @@
+import cv2
 import numpy as np
 
 
 def white_balance(image: np.ndarray) -> np.ndarray:
-    """Apply gray-world white balance to an RGB image."""
+    """Apply Gray-World white balance to an RGB image."""
 
     if image.ndim != 3 or image.shape[2] != 3:
         raise ValueError("Expected an RGB image with shape (H, W, 3).")
 
-    R=image[:,:,0]
-    G=image[:,:,1]
-    B=image[:,:,2]
+    image = image.astype(np.float32)
 
-    R_mean = np.mean(R)
-    G_mean = np.mean(G)
-    B_mean = np.mean(B)
-    target = (R_mean + G_mean + B_mean) / 3
-    if R_mean == 0 or G_mean == 0 or B_mean == 0:
+    channel_means = image.mean(axis=(0, 1))
+
+    if np.any(channel_means == 0):
         raise ValueError("Cannot apply white balance when a channel mean is zero.")
 
-    scale_R=target/R_mean
-    scale_G=target/G_mean
-    scale_B=target/B_mean
+    target = channel_means.mean()
+    scale = target / channel_means
 
-    adjusted_R=R*scale_R
-    adjusted_B=B*scale_B
-    adjusted_G=G*scale_G
+    balanced = image * scale
+    return np.clip(balanced, 0, 255).astype(np.uint8)
 
-    balanced=np.stack([adjusted_R,adjusted_G,adjusted_B],axis=2)
-    clip=np.clip(balanced,0,255)
-    clip=clip.astype(np.uint8)
-    return clip
+
+def apply_clahe(
+    image: np.ndarray,
+    clip_limit: float = 2.0,
+    tile_grid_size: tuple[int, int] = (8, 8),
+) -> np.ndarray:
+    """Improve local contrast using CLAHE on the LAB luminance channel."""
+
+    if image.ndim != 3 or image.shape[2] != 3:
+        raise ValueError("Expected an RGB image with shape (H, W, 3).")
+
+    lab = cv2.cvtColor(image, cv2.COLOR_RGB2LAB)
+
+    l_channel, a_channel, b_channel = cv2.split(lab)
+
+    clahe = cv2.createCLAHE(
+        clipLimit=clip_limit,
+        tileGridSize=tile_grid_size,
+    )
+
+    enhanced_l = clahe.apply(l_channel)
+
+    enhanced_lab = cv2.merge((enhanced_l, a_channel, b_channel))
+
+    return cv2.cvtColor(enhanced_lab, cv2.COLOR_LAB2RGB)
+
+
+def enhance_image(image: np.ndarray) -> np.ndarray:
+    """Apply the traditional AquaVision enhancement pipeline."""
+
+    balanced = white_balance(image)
+    enhanced = apply_clahe(balanced)
+
+    return enhanced
