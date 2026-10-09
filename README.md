@@ -258,6 +258,24 @@ pip install -e .
 
 ---
 
+## Trained Model Checkpoint
+
+AquaVision uses a trained YOLO model for underwater marine-object detection. The model weights are distributed separately from the source code and are not committed to this repository.
+
+### Download the Model
+
+1. Download `best.pt` from the team's Google Drive: **[Download trained model](https://drive.google.com/file/d/1Dc5yFIdIWsbKuW_qDgmMveYGofvsKnqu/view?usp=drive_link)**.
+2. Create the `models` directory in the repository if it does not already exist.
+3. Place the downloaded checkpoint at:
+
+   `models/best.pt`
+
+### Important Notes
+
+- The trained checkpoint is required to run object detection.
+- Dataset files and trained model weights are maintained separately from the source repository.
+- Do not commit model checkpoints, datasets, virtual environments, or generated training outputs.
+
 ## 📌 Project Principles
 
 * **No fabricated results** — metrics are reported only from completed experiments.
