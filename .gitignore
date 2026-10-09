@@ -90,3 +90,7 @@ Thumbs.db
 
 *.tmp
 *.temp*.egg-info/
+
+
+# Generated evaluation outputs
+outputs/
